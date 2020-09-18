@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--设置每行显示最多20个-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:ellipsize="middle"
+    android:gravity="center"
+    android:maxEms="10"
+    android:paddingHorizontal="8dp"
+    android:textColor="@android:color/black"
+    android:textSize="18sp"
+    tools:background="@android:color/darker_gray"
+    tools:text="12345678901234567890123456789012345678901234567890"
+    tools:textStyle="bold" />

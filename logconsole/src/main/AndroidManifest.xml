@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.duode.log.logconsole">
+
+    <application>
+        <activity
+            android:name=".ConsoleActivity"
+            android:theme="@style/DialogActivity" />
+    </application>
+</manifest>

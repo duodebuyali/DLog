@@ -1,0 +1,4 @@
+include ':loglibrary'
+include ':logconsole'
+include ':app'
+rootProject.name = "DLog"
