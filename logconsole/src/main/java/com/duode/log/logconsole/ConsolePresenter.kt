@@ -1,6 +1,7 @@
 package com.duode.log.logconsole
 
 import com.duode.log.logconsole.base.BasePresenter
+import com.duode.log.logconsole.bean.LogRuleData
 import com.duode.log.logconsole.bean.QueryConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
 import com.duode.loglibrary.consts.LogConst
@@ -15,6 +16,110 @@ class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleVie
 
     private val mModel by lazy {
         ConsoleModel(view.getContext()!!)
+    }
+
+    fun buildLogRuleData(queryConfigData: QueryConfigData): MutableList<MutableList<LogRuleData>> {
+        val datas = mutableListOf<MutableList<LogRuleData>>()
+
+        datas.add(buildFlagRuleValue(queryConfigData.queryFlag))
+        datas.add(buildRuleValue("globalTag", queryConfigData.queryGlobalTag))
+        datas.add(buildRuleValue("selfTag", queryConfigData.querySelfTag))
+        datas.add(buildRuleValue("fileName", queryConfigData.queryFileName))
+        datas.add(buildRuleValue("className", queryConfigData.queryClassName))
+        datas.add(buildRuleValue("methodName", queryConfigData.queryMethodName))
+
+        return datas
+    }
+
+    fun buildFlagRuleValue(value: Int): MutableList<LogRuleData> {
+        val datas = mutableListOf<LogRuleData>()
+        if (value != ConsoleConst.NONE_MATCH_FLAG) {
+            datas.add(
+                LogRuleData(
+                    "flag 匹配：",
+                    "$value",
+                    value.toString(),
+                    true
+                )
+            )
+        }
+        datas.add(
+            LogRuleData(
+                "flag 匹配：",
+                ConsoleConst.NONE_MATCH_DES,
+                ConsoleConst.NONE_MATCH_FLAG.toString()
+            )
+        )
+        return datas
+    }
+
+    fun buildRuleValue(prefix: String, value: String): MutableList<LogRuleData> {
+        val datas = mutableListOf<LogRuleData>()
+        when (prefix) {
+            "globalTag" -> {
+                if (value != ConsoleConst.NONE_MATCH_GLOBAL_TAG) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                }
+                datas.add(
+                    LogRuleData(
+                        "$prefix 匹配：",
+                        ConsoleConst.NONE_MATCH_DES,
+                        ConsoleConst.NONE_MATCH_GLOBAL_TAG
+                    )
+                )
+            }
+            "selfTag" -> {
+                if (value != ConsoleConst.NONE_MATCH_SELF_TAG) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                }
+                datas.add(
+                    LogRuleData(
+                        "$prefix 匹配：",
+                        ConsoleConst.NONE_MATCH_DES,
+                        ConsoleConst.NONE_MATCH_SELF_TAG
+                    )
+                )
+            }
+            "fileName" -> {
+                if (value != ConsoleConst.NONE_MATCH_FILE_NAME) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                }
+                datas.add(
+                    LogRuleData(
+                        "$prefix 匹配：",
+                        ConsoleConst.NONE_MATCH_DES,
+                        ConsoleConst.NONE_MATCH_FILE_NAME
+                    )
+                )
+            }
+            "className" -> {
+                if (value != ConsoleConst.NONE_MATCH_CLASS_NAME) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                }
+                datas.add(
+                    LogRuleData(
+                        "$prefix 匹配：",
+                        ConsoleConst.NONE_MATCH_DES,
+                        ConsoleConst.NONE_MATCH_CLASS_NAME
+                    )
+                )
+            }
+            "methodName" -> {
+                if (value != ConsoleConst.NONE_MATCH_METHOD_NAME) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                }
+                datas.add(
+                    LogRuleData(
+                        "$prefix 匹配：",
+                        ConsoleConst.NONE_MATCH_DES,
+                        ConsoleConst.NONE_MATCH_METHOD_NAME
+                    )
+                )
+            }
+            else -> {
+            }
+        }
+        return datas
     }
 
     fun fetchLogs(globalTag: String = LogConst.DEFAULT_TAG_GLOBAL, tag: String = "") {
@@ -33,7 +138,6 @@ class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleVie
 
             })
     }
-
 
     fun queryLogs(configData: QueryConfigData) {
         mModel.query(configData)

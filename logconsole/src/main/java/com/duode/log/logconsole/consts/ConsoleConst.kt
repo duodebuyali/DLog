@@ -41,4 +41,6 @@ object ConsoleConst {
      * 传递的console配置信息
      * */
     const val EXTRA_CONSOLE_CONFIG = "extra_console_config"
+
+    const val NONE_MATCH_DES="全部"
 }

@@ -5,7 +5,7 @@ import androidx.annotation.IntDef
 
 /**
  * @author hekang
- * @des
+ * @des 限制指定console的位置
  * @date 2020/9/16 15:40
  */
 @IntDef(
