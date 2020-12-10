@@ -2,6 +2,7 @@ package com.duode.dlog
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.duode.dlog.test.TestActivity
 import com.duode.log.logconsole.ConsoleActivity
 import com.duode.log.logconsole.adapter.ConsoleAdapter
 import com.duode.log.logconsole.bean.ConsoleConfigData
@@ -31,19 +32,23 @@ class MainActivity : AppCompatActivity() {
             LogUtils.d("MainActivity", 1, "btn_log")
             LogUtils.e("MainActivity", 1, "btn_log")
         }
-        btn_test.setOnClickListener {
-            val configData = ConsoleConfigData(
-//                Gravity.CENTER,
-//                widthRadio = 0.8f,
-//                heightRadio = 0.8f,
-                queryConfigData = QueryConfigData(
-                    querySelfTag = "MainActivity",
-                    queryMethodName = "%onClick"
-                )
-//                QueryConfigData()
-            )
-            startActivity(ConsoleActivity.getCallIntent(this@MainActivity, configData))
+
+        btn_vm.setOnClickListener { //flag可以自定义，用来自己进行限制
+            startActivity(TestActivity.getCallIntent(this))
         }
+         btn_console.setOnClickListener {
+             val configData = ConsoleConfigData(
+ //                Gravity.CENTER,
+ //                widthRadio = 0.8f,
+ //                heightRadio = 0.8f,
+                 queryConfigData = QueryConfigData(
+                     querySelfTag = "MainActivity",
+                     queryMethodName = "%onClick"
+                 )
+ //                QueryConfigData()
+             )
+             startActivity(ConsoleActivity.getCallIntent(this@MainActivity, configData))
+         }
     }
 
 }

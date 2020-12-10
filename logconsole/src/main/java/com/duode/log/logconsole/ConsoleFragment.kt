@@ -7,21 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bin.david.form.data.table.MapTableData
+import com.duode.jitpacklib.BaseVMFragment
 import com.duode.log.logconsole.adapter.LogRuleAdapter
-import com.duode.log.logconsole.base.BaseFragment
 import com.duode.log.logconsole.bean.ConsoleConfigData
 import com.duode.log.logconsole.bean.QueryConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
+import com.duode.log.logconsole.databinding.FragmentConsoleBinding
 import com.duode.log.logconsole.listener.OnQueryRuleChangeListener
-import kotlinx.android.synthetic.main.fragment_console.view.*
 
 /**
  * @author hekang
  * @des 用来展示调试信息的fragment
  * @date 2020/9/1 15:07
  */
-class ConsoleFragment : BaseFragment(), ConsoleView, OnQueryRuleChangeListener {
+class ConsoleFragment : BaseVMFragment<ConsoleVM>(), OnQueryRuleChangeListener {
+
+    override val providerVMClass: Class<ConsoleVM>
+        get() = ConsoleVM::class.java
 
     companion object {
         fun getInstance(data: ConsoleConfigData): ConsoleFragment {
@@ -33,13 +35,7 @@ class ConsoleFragment : BaseFragment(), ConsoleView, OnQueryRuleChangeListener {
         }
     }
 
-    private val mPresenter by lazy {
-        ConsolePresenter(this)
-    }
-
-    private val mLogs by lazy {
-        ArrayList<LinkedHashMap<String, String>>()
-    }
+    lateinit var mBD: FragmentConsoleBinding
 
     private val mPd by lazy {
         val pd = ProgressDialog(context)
@@ -48,7 +44,19 @@ class ConsoleFragment : BaseFragment(), ConsoleView, OnQueryRuleChangeListener {
         pd
     }
 
-    private lateinit var mRootView: View
+    override fun onSubscribe(needShow: Boolean) {
+        if (needShow) {
+            if (!mPd.isShowing) {
+                mPd.show()
+            }
+        }
+    }
+
+    override fun onCompleted() {
+        if (mPd.isShowing) {
+            mPd.dismiss()
+        }
+    }
 
     private val mAdapter by lazy {
         LogRuleAdapter(mutableListOf(), this)
@@ -58,56 +66,37 @@ class ConsoleFragment : BaseFragment(), ConsoleView, OnQueryRuleChangeListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mRootView = inflater.inflate(R.layout.fragment_console, container, false)
-
-        mRootView.rule_rv.layoutManager =
-            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        mRootView.rule_rv.adapter = mAdapter
-
-        return mRootView
+    ): View {
+        mBD = binding(inflater, R.layout.fragment_console, container)
+        //订阅liveData
+        mBD.lifecycleOwner = viewLifecycleOwner
+        return mBD.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val configData =
             arguments?.getParcelable<ConsoleConfigData>(ConsoleConst.EXTRA_CONSOLE_CONFIG) ?: return
-        mAdapter.setData(mPresenter.buildLogRuleData(configData.queryConfigData))
 
+        mBD.vm = mVM
+        mVM.ctx = context
+        mBD.config = configData.queryConfigData
+
+        mBD.ruleRv.layoutManager =
+            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        mBD.ruleRv.adapter = mAdapter
+        mAdapter.setData(mVM.buildLogRuleData(configData.queryConfigData))
+        //初次查询
         query(configData.queryConfigData)
     }
 
     private fun query(configData: QueryConfigData) {
-        if (!mPd.isShowing) {
-            mPd.show()
-        }
-        mPresenter.queryLogs(configData = configData)
-    }
-
-    private fun setupTable(logs: List<LinkedHashMap<String, String>>) {
-        if (mLogs.isNotEmpty()) {
-            mLogs.clear()
-        }
-        mLogs.addAll(logs)
-        val tableData = MapTableData.create("日志信息", mLogs as List<Any>)
-        mRootView.console_table.tableData = tableData
-    }
-
-    override fun showLogs(logs: List<LinkedHashMap<String, String>>) {
-        if (mPd.isShowing) {
-            mPd.dismiss()
-        }
-        setupTable(logs)
-    }
-
-    override fun onDestroyView() {
-        if (mPd.isShowing) {
-            mPd.dismiss()
-        }
-        super.onDestroyView()
+        mVM.queryLogs(configData = configData)
     }
 
     override fun onChange(queryConfigData: QueryConfigData) {
         query(queryConfigData)
     }
+
+
 }

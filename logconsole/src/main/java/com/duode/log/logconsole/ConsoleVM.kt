@@ -1,21 +1,28 @@
 package com.duode.log.logconsole
 
-import com.duode.log.logconsole.base.BasePresenter
+import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.bin.david.form.data.table.MapTableData
+import com.duode.jitpacklib.BaseVM
 import com.duode.log.logconsole.bean.LogRuleData
 import com.duode.log.logconsole.bean.QueryConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
+import com.duode.loglibrary.LogUtils
 import com.duode.loglibrary.consts.LogConst
-import io.reactivex.subscribers.DisposableSubscriber
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 
 /**
  * @author hekang
  * @des
  * @date 2020/9/15 15:01
  */
-class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleView>(view) {
+class ConsoleVM : BaseVM() {
+    var ctx: Context? = null
 
-    private val mModel by lazy {
-        ConsoleModel(view.getContext()!!)
+    private val mDataSource by lazy {
+        ConsoleDataSource(ctx!!)
     }
 
     fun buildLogRuleData(queryConfigData: QueryConfigData): MutableList<MutableList<LogRuleData>> {
@@ -31,7 +38,7 @@ class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleVie
         return datas
     }
 
-    fun buildFlagRuleValue(value: Int): MutableList<LogRuleData> {
+    private fun buildFlagRuleValue(value: Int): MutableList<LogRuleData> {
         val datas = mutableListOf<LogRuleData>()
         if (value != ConsoleConst.NONE_MATCH_FLAG) {
             datas.add(
@@ -53,7 +60,7 @@ class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleVie
         return datas
     }
 
-    fun buildRuleValue(prefix: String, value: String): MutableList<LogRuleData> {
+    private fun buildRuleValue(prefix: String, value: String): MutableList<LogRuleData> {
         val datas = mutableListOf<LogRuleData>()
         when (prefix) {
             "globalTag" -> {
@@ -123,38 +130,28 @@ class ConsolePresenter(private val view: ConsoleView) : BasePresenter<ConsoleVie
     }
 
     fun fetchLogs(globalTag: String = LogConst.DEFAULT_TAG_GLOBAL, tag: String = "") {
-        mModel.queryListByTag(globalTag, tag)
-            .compose(view.bindLifecycle())
-            .subscribe(object : DisposableSubscriber<List<LinkedHashMap<String, String>>>() {
-                override fun onComplete() {
-                }
+        launchOnUITryCatch({
+            val deferred = async(Dispatchers.IO) { mDataSource.queryListByTag(globalTag, tag) }
+            deferred.await()
+        }, {})
 
-                override fun onNext(t: List<LinkedHashMap<String, String>>) {
-                    view.showLogs(t)
-                }
-
-                override fun onError(e: Throwable) {
-                }
-
-            })
     }
 
+
+    val mTableData: LiveData<MapTableData>
+        get() = mutableLiveData
+    private val mutableLiveData = MutableLiveData<MapTableData>()
+
     fun queryLogs(configData: QueryConfigData) {
-        mModel.query(configData)
-            .compose(view.bindLifecycle())
-            .subscribe(object : DisposableSubscriber<List<LinkedHashMap<String, String>>>() {
-                override fun onComplete() {
-                }
-
-                override fun onNext(t: List<LinkedHashMap<String, String>>) {
-                    view.showLogs(t)
-                }
-
-                override fun onError(e: Throwable) {
-                    view.showLogs(emptyList())
-                }
-
-            })
+        launchOnUITryCatch({
+            val deferred = async(Dispatchers.IO) { mDataSource.query(configData) }
+            val data = deferred.await()
+            if (data.isNotEmpty()) {
+                val tableData = MapTableData.create("日志信息", data as List<Any>)
+                mutableLiveData.value = tableData
+                LogUtils.d(msg = "mTableData:${mTableData.value};${mTableData.hasObservers()}")
+            }
+        }, {})
     }
 
     /**

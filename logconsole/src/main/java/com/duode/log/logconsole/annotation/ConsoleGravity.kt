@@ -14,6 +14,7 @@ import androidx.annotation.IntDef
     Gravity.BOTTOM, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, Gravity.BOTTOM or Gravity.RIGHT
 )
 @Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class ConsoleGravity {
     //这里可以申明自己的常量类型
 }

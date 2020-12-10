@@ -5,8 +5,6 @@ import android.text.TextUtils
 import com.duode.log.logconsole.consts.ConsoleConst
 import com.duode.log.logconsole.transforms.LogInfoTransform
 import com.duode.loglibrary.bean.LogInfoData
-import io.reactivex.Completable
-import io.reactivex.Flowable
 
 /**
  * @author hekang
@@ -15,21 +13,22 @@ import io.reactivex.Flowable
  * @date 2020/9/10 16:36
  *
  */
-class LogInfoRepository(private val ctx: Context) {
+class LogInfoDBStore(private val ctx: Context) {
 
+    // TODO: 2020/12/9 后续应该有一个ApplicationUtils或ActivityUtils来获取Context
     private val mDao by lazy {
         LogInfoDb.getInstance(ctx).logInfoDao()
     }
 
-    fun insert(data: LogInfoData): Completable {
+    suspend fun insert(data: LogInfoData) {
         val table = LogInfoTransform.dataToDb(data)
-        return mDao.insert(table)
+        mDao.insert(table)
     }
 
-    fun queryListByTag(
+    suspend fun queryListByTag(
         globalTag: String,
         selfTag: String = ""
-    ): Flowable<MutableList<LogInfoTable>> {
+    ): MutableList<LogInfoTable> {
         return if (TextUtils.isEmpty(selfTag)) {
             mDao.queryListByTag(globalTag, Int.MAX_VALUE)
         } else {
@@ -37,24 +36,24 @@ class LogInfoRepository(private val ctx: Context) {
         }
     }
 
-    fun queryListByFileName(fileName: String): Flowable<MutableList<LogInfoTable>> {
+    suspend fun queryListByFileName(fileName: String): MutableList<LogInfoTable> {
         return mDao.queryListByFileName(fileName)
     }
 
-    fun queryListByClassName(classNameSuffix: String): Flowable<MutableList<LogInfoTable>> {
+    suspend fun queryListByClassName(classNameSuffix: String): MutableList<LogInfoTable> {
         return mDao.queryListByClassName(classNameSuffix)
     }
 
-    fun query(
+    suspend fun query(
         queryFlag: Int,
         queryGlobalTag: String,
         querySelfTag: String,
         queryFileName: String,
         queryClassName: String,
         queryMethodName: String
-    ): Flowable<MutableList<LogInfoTable>> {
+    ): MutableList<LogInfoTable> {
 
-        val flagMathStr= if (queryFlag==ConsoleConst.NONE_MATCH_FLAG) "%" else "$queryFlag"
+        val flagMathStr = if (queryFlag == ConsoleConst.NONE_MATCH_FLAG) "%" else "$queryFlag"
         return mDao.queryList(
             flagMathStr,
             queryGlobalTag,

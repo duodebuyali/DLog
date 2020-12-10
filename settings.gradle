@@ -1,3 +1,5 @@
+include ':jitpacklib'
+include ':netlibrary'
 include ':loglibrary'
 include ':logconsole'
 include ':app'
