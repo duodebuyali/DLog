@@ -130,10 +130,10 @@ class ConsoleVM : BaseVM() {
     }
 
     fun fetchLogs(globalTag: String = LogConst.DEFAULT_TAG_GLOBAL, tag: String = "") {
-        launchOnUITryCatch({
+        launchOnUITryCatch {
             val deferred = async(Dispatchers.IO) { mDataSource.queryListByTag(globalTag, tag) }
             deferred.await()
-        }, {})
+        }
 
     }
 
@@ -143,7 +143,7 @@ class ConsoleVM : BaseVM() {
     private val mutableLiveData = MutableLiveData<MapTableData>()
 
     fun queryLogs(configData: QueryConfigData) {
-        launchOnUITryCatch({
+        launchOnUITryCatch {
             val deferred = async(Dispatchers.IO) { mDataSource.query(configData) }
             val data = deferred.await()
             if (data.isNotEmpty()) {
@@ -151,7 +151,7 @@ class ConsoleVM : BaseVM() {
                 mutableLiveData.value = tableData
                 LogUtils.d(msg = "mTableData:${mTableData.value};${mTableData.hasObservers()}")
             }
-        }, {})
+        }
     }
 
     /**

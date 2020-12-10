@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModel
+import com.duode.jitpacklib.utils.CommonObserverManager
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -18,6 +19,7 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
     override val coroutineContext: CoroutineContext
         get() = mDispatcher
 
+
     /**
      * 用来管理job
      * */
@@ -25,15 +27,34 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
 
     /**
      * 统一进行异常处理
-     * @param tryBlock 默认在主线程中进行的协程方法
+     * @param tryBlock 耗时任务,默认在子线程中进行的协程方法
+     * */
+    protected fun CoroutineScope.launchOnUITryCatch(
+        tryBlock: suspend CoroutineScope.() -> Unit
+    ) {
+        launchOnUI {
+            doWithTryCatch({ CommonObserverManager.onStart?.invoke() },
+                tryBlock,
+                { CommonObserverManager.onCompleted?.invoke() },
+                {
+                    handleException(it)
+                })
+        }
+    }
+
+    /**
+     * 统一进行异常处理
+     * @param startBlock 默认在主线程中进行的协程方法
+     * @param tryBlock 默认在子线程中进行的协程方法
      * @param finallyBlock 任务完成或异常之后，都会进行的方法
      * */
     protected fun CoroutineScope.launchOnUITryCatch(
+        startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
         finallyBlock: suspend CoroutineScope.() -> Unit
     ) {
         launchOnUI {
-            doWithTryCatch(tryBlock, finallyBlock, {
+            doWithTryCatch(startBlock, tryBlock, finallyBlock, {
                 handleException(it)
             })
         }
@@ -44,12 +65,13 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
      * @param catchBlock 单独的异常处理方法
      * */
     protected fun CoroutineScope.launchOnUITryCatch(
+        startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
         finallyBlock: suspend CoroutineScope.() -> Unit,
         catchBlock: suspend CoroutineScope.(Throwable) -> Unit
     ) {
         launchOnUI {
-            doWithTryCatch(tryBlock, finallyBlock, catchBlock)
+            doWithTryCatch(startBlock, tryBlock, finallyBlock, catchBlock)
         }
     }
 
@@ -66,13 +88,17 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
     }
 
     private suspend fun CoroutineScope.doWithTryCatch(
+        startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
         finallyBlock: suspend CoroutineScope.() -> Unit,
         catchBlock: suspend CoroutineScope.(Throwable) -> Unit
     ) {
         try {
+            startBlock()
             // TODO: 2020/12/9 可以对这里的执行任务进行细分，如果需要在后台执行的任务，可以单独再创建一个CoroutineScope
-            tryBlock()
+            withContext(Dispatchers.IO) {
+                tryBlock()
+            }
         } catch (e: Throwable) {
             if (e is CancellationException) {
                 //任务被取消

@@ -3,10 +3,11 @@ package com.duode.dlog.test
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.duode.jitpacklib.BaseVMActivity
 import com.duode.dlog.R
 import com.duode.dlog.databinding.ActivityTestBinding
 import com.duode.dlog.test.vm.TestVM
+import com.duode.jitpacklib.BaseVMActivity
+import com.duode.jitpacklib.utils.CommonObserverManager
 import kotlinx.android.synthetic.main.activity_test.*
 
 /**
@@ -33,7 +34,11 @@ class TestActivity : BaseVMActivity<TestVM>() {
         mDB.vm = mVM
 
         btn_suspend.setOnClickListener {
-            mVM.getWeather({ onSubscribe() }, { onCompleted() })
+            mVM.getWeather({ println("btn_suspend--onStart")}, { })
+        }
+
+        CommonObserverManager.onStart = {
+            println("CommonObserverManager--onStart")
         }
     }
 

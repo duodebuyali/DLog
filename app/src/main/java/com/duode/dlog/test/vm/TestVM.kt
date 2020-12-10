@@ -9,10 +9,8 @@ import com.duode.jitpacklib.BaseVM
 import com.duode.jitpacklib.utils.ResponseHandler
 import com.duode.netlibrary.utils.ErrorHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 
 /**
  * @author hekang
@@ -47,7 +45,7 @@ class TestVM : BaseVM() {
      * TODO: 2020/12/8 后续可以直接将start 和 finally方法放在 vm中实现
      * */
     fun getWeatherFlow() {
-        launchOnUITryCatch({
+        launchOnUITryCatch {
             mApiStore.getWeatherFlow()
                 .onStart { println("getWeatherFlow--onStart") }
                 .catch {
@@ -60,21 +58,21 @@ class TestVM : BaseVM() {
                     println("getWeatherFlow:${data.wendu}")
                 }
 
-        }, {
-        })
+        }
     }
 
     fun getWeather(start: () -> Unit, finally: () -> Unit) {
         launchOnUITryCatch({
             start()
+        }, {
             // FIXME: 2020/12/9 这里一定需要使用另外一个CoroutineScope包裹
 //            val deferred = GlobalScope.async(Dispatchers.IO) {
 //                mApiStore.getWeather()
 //            }
-
-            val response = withContext(Dispatchers.IO) {
-                mApiStore.getWeather()
-            }
+//            val response = withContext(Dispatchers.IO) {
+//                mApiStore.getWeather()
+//            }
+            val response = mApiStore.getWeather()
             val data = ResponseHandler.handleBaseResponse(response) ?: return@launchOnUITryCatch
             println("getWeather:${data.ganmao}")
         }, {
