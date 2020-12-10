@@ -3,6 +3,7 @@ package com.duode.jitpacklib
 import android.app.Activity
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 
 /**
@@ -24,15 +25,19 @@ abstract class BaseVMFragment<VM : BaseVM> : BaseFragment() {
      * */
     abstract val providerVMClass: Class<VM>
 
+    protected lateinit var mActivity: FragmentActivity
+
+
     /**
      * 防止后续需要修改
      * */
     protected open fun provideVM(): VM {
-        return ViewModelProvider(activity!!).get(providerVMClass)
+        return ViewModelProvider(mActivity).get(providerVMClass)
     }
 
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
+        mActivity = if (activity is BaseActivity) activity else getActivity()!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
