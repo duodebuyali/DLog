@@ -66,13 +66,8 @@ class LogRuleAdapter(
     }
 
     class LogRuleHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var spinner: AppCompatSpinner
-        var divider: View
-
-        init {
-            spinner = itemView.findViewById(R.id.value_spinner)
-            divider = itemView.findViewById(R.id.divider_view)
-        }
+        val spinner: AppCompatSpinner = itemView.findViewById(R.id.value_spinner)
+        val divider: View = itemView.findViewById(R.id.divider_view)
 
     }
 

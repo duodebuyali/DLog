@@ -30,6 +30,7 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
      * @param tryBlock 耗时任务,默认在子线程中进行的协程方法
      * */
     protected fun CoroutineScope.launchOnUITryCatch(
+        isChangeContext: Boolean = true,
         tryBlock: suspend CoroutineScope.() -> Unit
     ) {
         launchOnUI {
@@ -38,7 +39,7 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
                 { CommonObserverManager.onCompleted?.invoke() },
                 {
                     handleException(it)
-                })
+                }, isChangeContext)
         }
     }
 
@@ -51,27 +52,33 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
     protected fun CoroutineScope.launchOnUITryCatch(
         startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
-        finallyBlock: suspend CoroutineScope.() -> Unit
+        finallyBlock: suspend CoroutineScope.() -> Unit,
+        isChangeContext: Boolean = true
     ) {
         launchOnUI {
             doWithTryCatch(startBlock, tryBlock, finallyBlock, {
                 handleException(it)
-            })
+            }, isChangeContext)
         }
     }
 
     /**
      * 需要自己进行异常处理
+     * @param startBlock 默认在主线程中进行的协程方法
+     * @param tryBlock 默认在子线程中进行的协程方法
+     * @param finallyBlock 任务完成或异常之后，都会进行的方法
      * @param catchBlock 单独的异常处理方法
+     * @param isChangeContext 是否使用withContext切换CoroutineContext
      * */
     protected fun CoroutineScope.launchOnUITryCatch(
         startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
         finallyBlock: suspend CoroutineScope.() -> Unit,
-        catchBlock: suspend CoroutineScope.(Throwable) -> Unit
+        catchBlock: suspend CoroutineScope.(Throwable) -> Unit,
+        isChangeContext: Boolean = true
     ) {
         launchOnUI {
-            doWithTryCatch(startBlock, tryBlock, finallyBlock, catchBlock)
+            doWithTryCatch(startBlock, tryBlock, finallyBlock, catchBlock, isChangeContext)
         }
     }
 
@@ -91,14 +98,20 @@ open class BaseVM(private val mDispatcher: CoroutineDispatcher = Dispatchers.Mai
         startBlock: suspend CoroutineScope.() -> Unit,
         tryBlock: suspend CoroutineScope.() -> Unit,
         finallyBlock: suspend CoroutineScope.() -> Unit,
-        catchBlock: suspend CoroutineScope.(Throwable) -> Unit
+        catchBlock: suspend CoroutineScope.(Throwable) -> Unit,
+        isChangeContext: Boolean = true
     ) {
         try {
             startBlock()
-            // TODO: 2020/12/9 可以对这里的执行任务进行细分，如果需要在后台执行的任务，可以单独再创建一个CoroutineScope
-            withContext(Dispatchers.IO) {
+            // 对这里的执行任务进行细分，如果需要在后台执行的任务，单独再创建一个CoroutineScope
+            if (isChangeContext) {
+                withContext(Dispatchers.IO) {
+                    tryBlock()
+                }
+            } else {
                 tryBlock()
             }
+
         } catch (e: Throwable) {
             if (e is CancellationException) {
                 //任务被取消

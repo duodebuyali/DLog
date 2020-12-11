@@ -40,10 +40,6 @@ class TestVM : BaseVM() {
             })
     }
 
-
-    /**
-     * TODO: 2020/12/8 后续可以直接将start 和 finally方法放在 vm中实现
-     * */
     fun getWeatherFlow() {
         launchOnUITryCatch {
             mApiStore.getWeatherFlow()

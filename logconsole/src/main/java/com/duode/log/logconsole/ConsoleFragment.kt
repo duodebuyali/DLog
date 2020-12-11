@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.duode.jitpacklib.BaseVMFragment
 import com.duode.log.logconsole.adapter.LogRuleAdapter
 import com.duode.log.logconsole.bean.ConsoleConfigData
+import com.duode.log.logconsole.bean.LogRuleData
 import com.duode.log.logconsole.bean.QueryConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
 import com.duode.log.logconsole.databinding.FragmentConsoleBinding
@@ -44,15 +46,13 @@ class ConsoleFragment : BaseVMFragment<ConsoleVM>(), OnQueryRuleChangeListener {
         pd
     }
 
-    override fun onSubscribe(needShow: Boolean) {
-        if (needShow) {
-            if (!mPd.isShowing) {
-                mPd.show()
-            }
+    fun onSubscribe() {
+        if (!mPd.isShowing) {
+            mPd.show()
         }
     }
 
-    override fun onCompleted() {
+    fun onCompleted() {
         if (mPd.isShowing) {
             mPd.dismiss()
         }
@@ -70,6 +70,7 @@ class ConsoleFragment : BaseVMFragment<ConsoleVM>(), OnQueryRuleChangeListener {
         mBD = binding(inflater, R.layout.fragment_console, container)
         //订阅liveData
         mBD.lifecycleOwner = viewLifecycleOwner
+
         return mBD.root
     }
 
@@ -85,13 +86,20 @@ class ConsoleFragment : BaseVMFragment<ConsoleVM>(), OnQueryRuleChangeListener {
         mBD.ruleRv.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         mBD.ruleRv.adapter = mAdapter
-        mAdapter.setData(mVM.buildLogRuleData(configData.queryConfigData))
+
+        //获取顶部条件
+        mVM.mRuleData.observe(viewLifecycleOwner,
+            Observer<MutableList<MutableList<LogRuleData>>> {
+                mAdapter.setData(it)
+            })
+        mVM.buildLogRuleData(configData.queryConfigData)
+
         //初次查询
         query(configData.queryConfigData)
     }
 
     private fun query(configData: QueryConfigData) {
-        mVM.queryLogs(configData = configData)
+        mVM.queryLogs({ onSubscribe() }, configData, { onCompleted() })
     }
 
     override fun onChange(queryConfigData: QueryConfigData) {

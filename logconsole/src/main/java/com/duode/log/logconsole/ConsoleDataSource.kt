@@ -38,4 +38,11 @@ class ConsoleDataSource(private val ctx: Context) {
             LogInfoTransform.dbToMap(data)
         }
     }
+
+    suspend fun queryGroup(): List<String> {
+        return mRepository.querySelfTagGroup()
+    }
+    suspend fun queryGroupByName(selfTag: String): List<String> {
+        return  mRepository.queryGroupByName(selfTag)
+    }
 }

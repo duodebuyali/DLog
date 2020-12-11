@@ -1,6 +1,5 @@
 package com.duode.log.logconsole.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.duode.log.logconsole.consts.LogInfoDbConst
@@ -87,5 +86,22 @@ interface LogInfoDao : IBaseDao<LogInfoTable> {
      * */
     @Query("DELETE FROM ${LogInfoDbConst.TABLE_NAME_LOG_INFO} WHERE className like :classNameSuffix")
     suspend fun deleteByClassName(classNameSuffix: String): Int
+
+    /**
+     * @return 查询 指定 fileName 的日志，以 mills 进行倒序
+     *
+     * fixme: 2020-12-10 如果传递参数来确认 group，会只能查询到一个数据
+     * */
+//   @Query(value = "select * from ${LogInfoDbConst.TABLE_NAME_LOG_INFO} group by :itemName")
+//    suspend fun queryGroupByName(itemName: String): MutableList<LogInfoTable>
+    @Query(value = "SELECT * FROM ${LogInfoDbConst.TABLE_NAME_LOG_INFO} GROUP BY selfTag")
+    suspend fun querySelfGroup(): MutableList<LogInfoTable>
+
+    /**
+     * 查询出所有条件的情况
+     * */
+    @Query(value = "SELECT * FROM ${LogInfoDbConst.TABLE_NAME_LOG_INFO} GROUP BY flag,globalTag,selfTag,logLevel,fileName,className,threadName")
+    suspend fun queryGroup(): MutableList<LogInfoTable>
+
 
 }

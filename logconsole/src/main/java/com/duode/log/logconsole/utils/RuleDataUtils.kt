@@ -26,7 +26,7 @@ object RuleDataUtils {
         datas.forEachIndexed { index, mutableList ->
             run {
                 val ruleData = mutableList.find {
-                    it.isSelected == true
+                    it.isSelected
                 } ?: return@run
                 when (index) {
                     0 -> {

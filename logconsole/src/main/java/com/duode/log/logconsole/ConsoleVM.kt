@@ -25,91 +25,185 @@ class ConsoleVM : BaseVM() {
         ConsoleDataSource(ctx!!)
     }
 
-    fun buildLogRuleData(queryConfigData: QueryConfigData): MutableList<MutableList<LogRuleData>> {
-        val datas = mutableListOf<MutableList<LogRuleData>>()
+    fun queryGroup() {
+        launchOnUITryCatch {
+            val groupList = mDataSource.queryGroup()
+            val groupAll = mDataSource.queryGroupByName("selfTag")
+            println("groupList:$groupList;groupAll:$groupAll")
 
-        datas.add(buildFlagRuleValue(queryConfigData.queryFlag))
-        datas.add(buildRuleValue("globalTag", queryConfigData.queryGlobalTag))
-        datas.add(buildRuleValue("selfTag", queryConfigData.querySelfTag))
-        datas.add(buildRuleValue("fileName", queryConfigData.queryFileName))
-        datas.add(buildRuleValue("className", queryConfigData.queryClassName))
-        datas.add(buildRuleValue("methodName", queryConfigData.queryMethodName))
-
-        return datas
-    }
-
-    private fun buildFlagRuleValue(value: Int): MutableList<LogRuleData> {
-        val datas = mutableListOf<LogRuleData>()
-        if (value != ConsoleConst.NONE_MATCH_FLAG) {
-            datas.add(
-                LogRuleData(
-                    "flag 匹配：",
-                    "$value",
-                    value.toString(),
-                    true
-                )
-            )
         }
-        datas.add(
-            LogRuleData(
-                "flag 匹配：",
-                ConsoleConst.NONE_MATCH_DES,
-                ConsoleConst.NONE_MATCH_FLAG.toString()
-            )
-        )
-        return datas
     }
 
-    private fun buildRuleValue(prefix: String, value: String): MutableList<LogRuleData> {
+    val mRuleData: LiveData<MutableList<MutableList<LogRuleData>>>
+        get() = mutableRule
+    private val mutableRule = MutableLiveData<MutableList<MutableList<LogRuleData>>>()
+
+    fun buildLogRuleData(queryConfigData: QueryConfigData) {
+
+        launchOnUITryCatch {
+            val datas = mutableListOf<MutableList<LogRuleData>>()
+            buildRuleValue(datas, "flag", queryConfigData.queryFlag.toString())
+            buildRuleValue(datas, "globalTag", queryConfigData.queryGlobalTag)
+            buildRuleValue(datas, "selfTag", queryConfigData.querySelfTag)
+            buildRuleValue(datas, "fileName", queryConfigData.queryFileName)
+            buildRuleValue(datas, "className", queryConfigData.queryClassName)
+            buildRuleValue(datas, "methodName", queryConfigData.queryMethodName)
+
+            mutableRule.postValue(datas)
+        }
+
+    }
+
+    // TODO: 2020/12/10 对每一个显示的类型进行group查询，这样用户可以筛选任意选项
+    private suspend fun buildRuleValue(
+        ruleData: MutableList<MutableList<LogRuleData>>,
+        prefix: String,
+        value: String
+    ) {
         val datas = mutableListOf<LogRuleData>()
         when (prefix) {
-            "globalTag" -> {
-                if (value != ConsoleConst.NONE_MATCH_GLOBAL_TAG) {
-                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
-                }
-                datas.add(
-                    LogRuleData(
-                        "$prefix 匹配：",
-                        ConsoleConst.NONE_MATCH_DES,
-                        ConsoleConst.NONE_MATCH_GLOBAL_TAG
+            "flag" -> {
+                val isMatchAllFlag = value.toInt() == ConsoleConst.NONE_MATCH_FLAG
+                if (!isMatchAllFlag) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            value,
+                            value,
+                            true
+                        )
                     )
-                )
+                } else {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_FLAG.toString(), true
+                        )
+                    )
+                }
+                mDataSource.queryGroupByName(prefix)
+                    .forEach {
+                        datas.add(LogRuleData("$prefix 匹配：", it, it))
+                    }
+
+                if (!isMatchAllFlag) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_FLAG.toString()
+                        )
+                    )
+                }
+            }
+            "globalTag" -> {
+                val isMatchAllGlobalTag = value == ConsoleConst.NONE_MATCH_GLOBAL_TAG
+                if (!isMatchAllGlobalTag) {
+                    datas.add(LogRuleData("$prefix 匹配：", value, value, true))
+                } else {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_GLOBAL_TAG, true
+                        )
+                    )
+                }
+                mDataSource.queryGroupByName(prefix)
+                    .forEach {
+                        datas.add(LogRuleData("$prefix 匹配：", it, it))
+                    }
+                if (!isMatchAllGlobalTag) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_GLOBAL_TAG
+                        )
+                    )
+                }
             }
             "selfTag" -> {
-                if (value != ConsoleConst.NONE_MATCH_SELF_TAG) {
+                val isMatchAllSelfTag = value == ConsoleConst.NONE_MATCH_SELF_TAG
+                if (!isMatchAllSelfTag) {
                     datas.add(LogRuleData("$prefix 匹配：", value, value, true))
-                }
-                datas.add(
-                    LogRuleData(
-                        "$prefix 匹配：",
-                        ConsoleConst.NONE_MATCH_DES,
-                        ConsoleConst.NONE_MATCH_SELF_TAG
+                } else {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_SELF_TAG, true
+                        )
                     )
-                )
+                }
+                mDataSource.queryGroupByName(prefix)
+                    .forEach {
+                        datas.add(LogRuleData("$prefix 匹配：", it, it))
+                    }
+                if (!isMatchAllSelfTag) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_SELF_TAG
+                        )
+                    )
+                }
             }
             "fileName" -> {
-                if (value != ConsoleConst.NONE_MATCH_FILE_NAME) {
+                val isMatchAllFileName = value == ConsoleConst.NONE_MATCH_FILE_NAME
+                if (!isMatchAllFileName) {
                     datas.add(LogRuleData("$prefix 匹配：", value, value, true))
-                }
-                datas.add(
-                    LogRuleData(
-                        "$prefix 匹配：",
-                        ConsoleConst.NONE_MATCH_DES,
-                        ConsoleConst.NONE_MATCH_FILE_NAME
+                } else {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_FILE_NAME, true
+                        )
                     )
-                )
+                }
+                mDataSource.queryGroupByName(prefix)
+                    .forEach {
+                        datas.add(LogRuleData("$prefix 匹配：", it, it))
+                    }
+                if (!isMatchAllFileName) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_FILE_NAME
+                        )
+                    )
+                }
             }
             "className" -> {
-                if (value != ConsoleConst.NONE_MATCH_CLASS_NAME) {
+                val isMatchAllClassName = value == ConsoleConst.NONE_MATCH_CLASS_NAME
+                if (!isMatchAllClassName) {
                     datas.add(LogRuleData("$prefix 匹配：", value, value, true))
-                }
-                datas.add(
-                    LogRuleData(
-                        "$prefix 匹配：",
-                        ConsoleConst.NONE_MATCH_DES,
-                        ConsoleConst.NONE_MATCH_CLASS_NAME
+                } else {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_CLASS_NAME, true
+                        )
                     )
-                )
+                }
+                mDataSource.queryGroupByName(prefix)
+                    .forEach {
+                        datas.add(LogRuleData("$prefix 匹配：", it, it))
+                    }
+                if (!isMatchAllClassName) {
+                    datas.add(
+                        LogRuleData(
+                            "$prefix 匹配：",
+                            ConsoleConst.NONE_MATCH_DES,
+                            ConsoleConst.NONE_MATCH_CLASS_NAME
+                        )
+                    )
+                }
             }
             "methodName" -> {
                 if (value != ConsoleConst.NONE_MATCH_METHOD_NAME) {
@@ -126,67 +220,22 @@ class ConsoleVM : BaseVM() {
             else -> {
             }
         }
-        return datas
+        ruleData.add(datas)
     }
-
-    fun fetchLogs(globalTag: String = LogConst.DEFAULT_TAG_GLOBAL, tag: String = "") {
-        launchOnUITryCatch {
-            val deferred = async(Dispatchers.IO) { mDataSource.queryListByTag(globalTag, tag) }
-            deferred.await()
-        }
-
-    }
-
 
     val mTableData: LiveData<MapTableData>
         get() = mutableLiveData
     private val mutableLiveData = MutableLiveData<MapTableData>()
 
-    fun queryLogs(configData: QueryConfigData) {
-        launchOnUITryCatch {
+    fun queryLogs(start: () -> Unit, configData: QueryConfigData, completed: () -> Unit) {
+        launchOnUITryCatch({ start() }, {
             val deferred = async(Dispatchers.IO) { mDataSource.query(configData) }
             val data = deferred.await()
-            if (data.isNotEmpty()) {
-                val tableData = MapTableData.create("日志信息", data as List<Any>)
-                mutableLiveData.value = tableData
-                LogUtils.d(msg = "mTableData:${mTableData.value};${mTableData.hasObservers()}")
-            }
-        }
+
+            val tableData = MapTableData.create("日志信息", data as List<Any>)
+            mutableLiveData.postValue(tableData)
+            LogUtils.d(msg = "mTableData:${mTableData.value};${mTableData.hasObservers()}")
+        }, { completed() })
     }
 
-    /**
-     * 生成查询语句
-     * */
-    private fun buildSql(configData: QueryConfigData): String {
-        val sb = StringBuilder()
-        if (configData.queryFlag != ConsoleConst.NONE_MATCH_FLAG) {
-            sb.append("flag LIKE ${configData.queryFlag}")
-        }
-        if (configData.queryGlobalTag != ConsoleConst.NONE_MATCH_GLOBAL_TAG) {
-            if (sb.isNotEmpty()) {
-                sb.append("AND ")
-            }
-            sb.append("globalTag LIKE ${configData.queryGlobalTag}")
-        }
-        if (configData.querySelfTag != ConsoleConst.NONE_MATCH_SELF_TAG) {
-            if (sb.isNotEmpty()) {
-                sb.append("AND ")
-            }
-            sb.append("selfTag LIKE ${configData.querySelfTag}")
-        }
-        if (configData.queryFileName != ConsoleConst.NONE_MATCH_FILE_NAME) {
-            if (sb.isNotEmpty()) {
-                sb.append("AND ")
-            }
-            sb.append("fileName LIKE ${configData.queryFileName}")
-        }
-        if (configData.queryGlobalTag != ConsoleConst.NONE_MATCH_CLASS_NAME) {
-            if (sb.isNotEmpty()) {
-                sb.append("AND ")
-            }
-            sb.append("className LIKE ${configData.queryClassName}")
-        }
-
-        return sb.toString()
-    }
 }

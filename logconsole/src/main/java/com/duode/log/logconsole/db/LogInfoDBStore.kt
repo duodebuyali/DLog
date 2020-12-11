@@ -20,6 +20,49 @@ class LogInfoDBStore(private val ctx: Context) {
         LogInfoDb.getInstance(ctx).logInfoDao()
     }
 
+    suspend fun querySelfTagGroup(): List<String> {
+        return mDao.querySelfGroup().map { it.selfTag }
+    }
+
+    // TODO: 2020/12/11 这里也可以修改为实现每个tableName的分组查询，根据不同的itemName调用不同的dao方法
+    suspend fun queryGroupByName(itemName: String): List<String> {
+        val list = mDao.queryGroup()
+        //这里去重指定的itemName
+        val map = HashMap<String, String>()
+        //flag,globalTag,selfTag,logLevel,fileName,className,threadName
+        list.forEach {
+            when (itemName) {
+                "flag" -> {
+                    map.put("${it.flag}", "${it.flag}")
+                }
+                "globalTag" -> {
+                    map.put(it.globalTag, it.globalTag)
+                }
+                "selfTag" -> {
+                    map.put(it.selfTag, it.selfTag)
+                }
+                "logLevel" -> {
+                    map.put("${it.logLevel}", "${it.logLevel}")
+                }
+                "fileName" -> {
+                    map.put(it.fileName, it.fileName)
+                }
+                "className" -> {
+                    val name = it.className
+                    map.put(name.substring(name.lastIndexOf(".") + 1), it.className)
+                }
+                "threadName" -> {
+                    map.put(it.threadName, it.threadName)
+                }
+                else -> {//如果没有匹配到，返回空
+
+                }
+
+            }
+        }
+        return map.keys.toList()
+    }
+
     suspend fun insert(data: LogInfoData) {
         val table = LogInfoTransform.dataToDb(data)
         mDao.insert(table)
@@ -59,7 +102,8 @@ class LogInfoDBStore(private val ctx: Context) {
             queryGlobalTag,
             querySelfTag,
             queryFileName,
-            queryClassName,
+            //由于返回的className，做了subString，增加通配符
+            "%$queryClassName",
             queryMethodName
         )
     }
