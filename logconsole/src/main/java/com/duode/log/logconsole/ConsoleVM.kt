@@ -4,12 +4,11 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bin.david.form.data.table.MapTableData
-import com.duode.jitpacklib.BaseVM
+import com.duode.jetpacklib.BaseVM
 import com.duode.log.logconsole.bean.LogRuleData
 import com.duode.log.logconsole.bean.QueryConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
 import com.duode.loglibrary.LogUtils
-import com.duode.loglibrary.consts.LogConst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 

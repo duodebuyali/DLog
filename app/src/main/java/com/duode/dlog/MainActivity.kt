@@ -31,24 +31,25 @@ class MainActivity : AppCompatActivity() {
             LogUtils.d("AppCompatActivity", 1, "btn_log")
             LogUtils.d("MainActivity", 1, "btn_log")
             LogUtils.e("MainActivity", 1, "btn_log")
+            LogUtils.e(msg = "btn_log")
         }
 
         btn_vm.setOnClickListener { //flag可以自定义，用来自己进行限制
             startActivity(TestActivity.getCallIntent(this))
         }
-         btn_console.setOnClickListener {
-             val configData = ConsoleConfigData(
- //                Gravity.CENTER,
- //                widthRadio = 0.8f,
- //                heightRadio = 0.8f,
-                 queryConfigData = QueryConfigData(
-                     querySelfTag = "MainActivity",
-                     queryMethodName = "%onClick"
-                 )
- //                QueryConfigData()
-             )
-             startActivity(ConsoleActivity.getCallIntent(this@MainActivity, configData))
-         }
+        btn_console.setOnClickListener {
+            val configData = ConsoleConfigData(
+                //                Gravity.CENTER,
+                //                widthRadio = 0.8f,
+                //                heightRadio = 0.8f,
+                queryConfigData = QueryConfigData(
+                    querySelfTag = "MainActivity",
+                    queryMethodName = "%onClick"
+                )
+                //                QueryConfigData()
+            )
+            startActivity(ConsoleActivity.getCallIntent(this@MainActivity, configData))
+        }
     }
 
 }

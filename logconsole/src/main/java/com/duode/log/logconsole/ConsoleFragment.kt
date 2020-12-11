@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.duode.jitpacklib.BaseVMFragment
+import com.duode.jetpacklib.BaseVMFragment
 import com.duode.log.logconsole.adapter.LogRuleAdapter
 import com.duode.log.logconsole.bean.ConsoleConfigData
 import com.duode.log.logconsole.bean.LogRuleData

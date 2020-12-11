@@ -1,6 +1,6 @@
 package com.duode.log.logconsole
 
-import com.duode.jitpacklib.BaseActivity
+import com.duode.jetpacklib.BaseActivity
 
 /**
  * @author hekang

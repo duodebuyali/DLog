@@ -3,7 +3,7 @@ package com.duode.dlog.test.net
 import androidx.lifecycle.LiveData
 import com.duode.dlog.consts.ApiConst
 import com.duode.dlog.test.bean.Weather
-import com.duode.jitpacklib.bean.BaseResponse
+import com.duode.jetpacklib.bean.BaseResponse
 import com.duode.netlibrary.ApiManager
 import com.duode.netlibrary.bean.ApiResponse
 import kotlinx.coroutines.flow.Flow

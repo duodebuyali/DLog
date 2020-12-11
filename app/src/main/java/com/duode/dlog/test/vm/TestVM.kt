@@ -5,8 +5,8 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.map
 import com.duode.dlog.test.bean.Weather
 import com.duode.dlog.test.net.TestApiStore
-import com.duode.jitpacklib.BaseVM
-import com.duode.jitpacklib.utils.ResponseHandler
+import com.duode.jetpacklib.BaseVM
+import com.duode.jetpacklib.utils.ResponseHandler
 import com.duode.netlibrary.utils.ErrorHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

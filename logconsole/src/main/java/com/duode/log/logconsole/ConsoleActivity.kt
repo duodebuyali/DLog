@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Window
 import android.widget.Toast
-import com.duode.jitpacklib.BaseActivity
+import com.duode.jetpacklib.BaseActivity
 import com.duode.log.logconsole.bean.ConsoleConfigData
 import com.duode.log.logconsole.consts.ConsoleConst
 import com.duode.log.logconsole.utils.ScreenUtils

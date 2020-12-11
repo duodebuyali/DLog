@@ -6,8 +6,8 @@ import android.os.Bundle
 import com.duode.dlog.R
 import com.duode.dlog.databinding.ActivityTestBinding
 import com.duode.dlog.test.vm.TestVM
-import com.duode.jitpacklib.BaseVMActivity
-import com.duode.jitpacklib.utils.CommonObserverManager
+import com.duode.jetpacklib.BaseVMActivity
+import com.duode.jetpacklib.utils.CommonObserverManager
 import kotlinx.android.synthetic.main.activity_test.*
 
 /**

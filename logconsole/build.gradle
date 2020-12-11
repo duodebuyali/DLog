@@ -81,7 +81,7 @@ dependencies {
 
     //日志库
     implementation project(":loglibrary")
-    implementation project(":jitpacklib")
+    implementation project(":jetpacklib")
 
     //Android表格
     implementation "com.github.huangyanbin:SmartTable:2.2.0"
