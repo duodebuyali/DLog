@@ -1,3 +1,5 @@
+include ':basenonviewlib'
+include ':ziplibrary'
 include ':baselibrary'
 include ':jetpacklib'
 include ':netlibrary'
