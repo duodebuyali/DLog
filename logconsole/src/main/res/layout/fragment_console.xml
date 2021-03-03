@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="vm"
             type="com.duode.log.logconsole.ConsoleVM" />
-
-        <variable
-            name="config"
-            type="com.duode.log.logconsole.bean.QueryConfigData" />
 
     </data>
 
@@ -31,10 +28,10 @@
         <com.bin.david.form.core.SmartTable
             android:id="@+id/console_table"
             android:layout_width="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/rule_rv"
-            app:setupTableData="@{vm.mTableData}" />
+            bind:setupTableData="@{vm.mTableData}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

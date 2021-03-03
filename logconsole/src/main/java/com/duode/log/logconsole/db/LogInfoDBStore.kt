@@ -9,7 +9,7 @@ import com.duode.loglibrary.bean.LogInfoData
 /**
  * @author hekang
  * @des 日志信息暴露给外部使用的数据管理类
- * 网络请求的数据也在这里，包含数据的解析和转化
+ * 包含数据的解析和转化
  * @date 2020/9/10 16:36
  *
  */

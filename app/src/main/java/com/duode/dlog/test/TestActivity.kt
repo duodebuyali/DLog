@@ -25,6 +25,15 @@ class TestActivity : BaseVMActivity<TestVM>() {
         fun getCallIntent(ctx: Context): Intent {
             return Intent(ctx, TestActivity::class.java)
         }
+
+        @JvmStatic
+        fun start(context: Context) {
+            val starter = Intent(context, TestActivity::class.java)
+                .apply {
+
+                }
+            context.startActivity(starter)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +43,10 @@ class TestActivity : BaseVMActivity<TestVM>() {
         mDB.vm = mVM
 
         btn_suspend.setOnClickListener {
-            mVM.getWeather({ println("btn_suspend--onStart")}, { })
+            mVM.getWeather({ println("btn_suspend--onStart") }, { })
+            Thread {
+                mVM.canRedo.set(true)
+            }.start()
         }
 
         CommonObserverManager.onStart = {

@@ -31,4 +31,10 @@ interface TestApi {
      */
     @GET("zaihuishou/Kotlin-mvvm/master/data.json")
     suspend fun forceWeather(): BaseResponse<Weather>
+
+    /**
+     * 获取天气信息
+     */
+    @GET("zaihuishou/Kotlin-mvvm/master/data.json")
+    suspend fun getWeather(): ApiResponse<BaseResponse<Weather>>
 }

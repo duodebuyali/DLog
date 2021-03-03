@@ -80,8 +80,7 @@ class ConsoleFragment : BaseVMFragment<ConsoleVM>(), OnQueryRuleChangeListener {
             arguments?.getParcelable<ConsoleConfigData>(ConsoleConst.EXTRA_CONSOLE_CONFIG) ?: return
 
         mBD.vm = mVM
-        mVM.ctx = context
-        mBD.config = configData.queryConfigData
+        mVM.ctx = context?.applicationContext
 
         mBD.ruleRv.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)

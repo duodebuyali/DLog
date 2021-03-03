@@ -12,7 +12,7 @@ import com.duode.loglibrary.bean.LogInfoData
  * 数据的表单以table结尾，用来和服务器数据(以bean结尾)以及仅本地数据使用(以data结尾)作区分
  * @date 2020/9/9 19:16
  *
- * @param id 用来作为唯一键；其他数据的含义参考:
+ * @param id 用来作为唯一键
  * @see LogInfoData
  */
 @Entity(tableName = LogInfoDbConst.TABLE_NAME_LOG_INFO)

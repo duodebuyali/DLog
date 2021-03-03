@@ -4,10 +4,7 @@ import android.content.Context
 import com.duode.log.logconsole.db.LogInfoDBStore
 import com.duode.loglibrary.bean.LogInfoData
 import com.duode.loglibrary.listener.LogAdapter
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 
 /**
@@ -39,7 +36,7 @@ class ConsoleAdapter(private val ctx: Context) : LogAdapter {
     override fun log(logInfo: LogInfoData) {
         //插入到数据库
         GlobalScope.launch {
-            withContext(mComputationDispatcher) {
+            withContext(Dispatchers.IO) {
                 mDBStore.insert(logInfo)
             }
         }

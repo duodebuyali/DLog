@@ -32,4 +32,7 @@ class TestApiStore : ApiManager<TestApi>() {
     suspend fun getWeather(): BaseResponse<Weather> {
         return mService.forceWeather()
     }
+    suspend fun fetchWeather(): ApiResponse<BaseResponse<Weather>> {
+        return mService.getWeather()
+    }
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.async
  * @date 2020/9/15 15:01
  */
 class ConsoleVM : BaseVM() {
+    //一定要是Application，否则可能导致内存泄漏
     var ctx: Context? = null
 
     private val mDataSource by lazy {

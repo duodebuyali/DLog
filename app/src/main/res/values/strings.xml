@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">DLog</string>
+    <string-array name="app_key">
+        <item >ss</item>
+        <item >xx</item>
+    </string-array>
 </resources>

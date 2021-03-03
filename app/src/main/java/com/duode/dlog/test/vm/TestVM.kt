@@ -1,5 +1,6 @@
 package com.duode.dlog.test.vm
 
+import androidx.databinding.ObservableField
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.map
@@ -19,6 +20,9 @@ import kotlinx.coroutines.flow.*
  */
 class TestVM : BaseVM() {
 
+    //表示是否可以返回
+    var canRedo = ObservableField(false)
+
     private val mApiStore by lazy {
         TestApiStore()
     }
@@ -29,7 +33,6 @@ class TestVM : BaseVM() {
                 ResponseHandler.handleApiResponse(it)
             data
         }
-
 
     val mWeatherLiveData = liveData<Weather?> {
         emitSource(mApiStore.getWeatherLiveData()
@@ -68,9 +71,11 @@ class TestVM : BaseVM() {
 //            val response = withContext(Dispatchers.IO) {
 //                mApiStore.getWeather()
 //            }
-            val response = mApiStore.getWeather()
-            val data = ResponseHandler.handleBaseResponse(response) ?: return@launchOnUITryCatch
-            println("getWeather:${data.ganmao}")
+            val response1 = mApiStore.fetchWeather()
+            val response2 = mApiStore.fetchWeather()
+//            val response = mApiStore.getWeather()
+//            val data = ResponseHandler.handleBaseResponse(response) ?: return@launchOnUITryCatch
+//            println("getWeather:${data.ganmao}")
         }, {
             finally()
         }, {
