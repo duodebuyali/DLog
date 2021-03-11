@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity() {
         btn_vm.setOnClickListener { //flag可以自定义，用来自己进行限制
             startActivity(TestActivity.getCallIntent(this))
         }
+        btn_layout.setOnClickListener { //flag可以自定义，用来自己进行限制
+            startActivity(LayoutActivity.getCallIntent(this))
+        }
         btn_console.setOnClickListener {
             val configData = ConsoleConfigData(
                 //                Gravity.CENTER,

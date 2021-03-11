@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".test.TestActivity" />
-<!--        <activity android:name=".test.DataBindingActivity" />-->
+        <activity android:name=".LayoutActivity" />
+        <!--        <activity android:name=".test.DataBindingActivity" />-->
     </application>
 
 </manifest>
