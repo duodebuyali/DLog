@@ -2,6 +2,7 @@ package com.duode.dlog
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.duode.dlog.algorithm.SortUtils
 import com.duode.dlog.test.TestActivity
 import com.duode.log.logconsole.ConsoleActivity
 import com.duode.log.logconsole.adapter.ConsoleAdapter
@@ -37,9 +38,16 @@ class MainActivity : AppCompatActivity() {
         btn_vm.setOnClickListener { //flag可以自定义，用来自己进行限制
             startActivity(TestActivity.getCallIntent(this))
         }
-        btn_layout.setOnClickListener { //flag可以自定义，用来自己进行限制
+
+        btn_layout.setOnClickListener {
             startActivity(LayoutActivity.getCallIntent(this))
         }
+
+        val a = intArrayOf(8, 1, 2, 44, 4, 656, 0, 33, 1, 5)
+        btn_sort.setOnClickListener {
+            SortUtils.shellSort(a)
+        }
+
         btn_console.setOnClickListener {
             val configData = ConsoleConfigData(
                 //                Gravity.CENTER,

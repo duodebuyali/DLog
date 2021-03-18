@@ -1,3 +1,4 @@
+include ':myapplication'
 include ':basenonviewlib'
 include ':ziplibrary'
 include ':baselibrary'
