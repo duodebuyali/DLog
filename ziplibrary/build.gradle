@@ -37,7 +37,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
     implementation "androidx.core:core-ktx:$KTX_CORE_VERSION"
     //zip
-    implementation 'net.lingala.zip4j:zip4j:2.6.4'
+    implementation 'net.lingala.zip4j:zip4j:2.8.0'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

@@ -72,15 +72,42 @@ object SortUtils {
         return result
     }
 
+
+    /**
+     * 插入排序
+     *  从左往右取值，依次与自己左边的数据进行对比，如果比自己大，就向后移一位，如果对比到最后一个了，右移一位的同时需要把值赋值给第一位；
+     *  反之如果是比自己小，把当前值赋值给对比值的上一位。
+     * */
+    fun insertSort(array: IntArray) {
+
+        a@ for (x in array.indices) {//(8, 1, 2, 44, 4, 656, 0, 33, 1, 5)
+            var y = x - 1
+            val v = array[x]
+            b@ while (y >= 0) {
+                if (array[y] > v) {//比取出来对比的数更大，后移一位
+                    array[y + 1] = array[y]
+                    if (y == 0) {//如果是最左边一个，表示v是最小的不再需要进行对比，直接赋值给第一位
+                        array[y] = v
+                    }
+                } else {
+                    array[y + 1] = v
+                    println("insertSort--i:$x;y:$y;array:${Arrays.toString(array)}")
+                    break@b//不需要再对左边的进行比较，当前被对比的数的上一位就是他的位置
+                }
+                println("insertSort--i:$x;y:$y;array:${Arrays.toString(array)}")
+                y--
+            }
+        }
+    }
+
+
     /**
      * 快速排序
      *
      * */
-    fun quickSort(array: IntArray){
+    fun quickSort(array: IntArray) {
 
 //        val pivotV=array[]
-
-
 
 
     }
