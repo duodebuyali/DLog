@@ -84,4 +84,6 @@ dependencies {
     implementation project(":logconsole")
     implementation project(":jetpacklib")
 
+    implementation project(":ziplibrary")
+
 }

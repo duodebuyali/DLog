@@ -3,11 +3,11 @@ package com.duode.ziplibrary
 import android.os.Build
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
-import net.lingala.zip4j.model.FileHeader
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.CompressionLevel
 import net.lingala.zip4j.model.enums.CompressionMethod
 import net.lingala.zip4j.model.enums.EncryptionMethod
+import net.lingala.zip4j.progress.ProgressMonitor
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -25,20 +25,25 @@ object ZipUtils {
     /**
      * 使用给定密码解压指定的ZIP压缩文件到指定目录
      *
-     *
      * 如果指定目录不存在,可以自动创建,不合法的路径将导致异常被抛出
      * @param zipFile 指定的ZIP压缩文件
      * @param destPath 解压目录,如果为空将和zipFile同级解压
      * @param psw ZIP文件的密码,传递空表示没有密码
+     * @param listener 监听状态
      * @return  解压后文件集合，返回为空，表示解压失败
      */
-    fun unzip(zipFile: File, destPath: String = "", psw: String = ""): ArrayList<File> {
+    fun unzip(
+        zipFile: File,
+        destPath: String = "",
+        psw: String = "",
+        listener: OnZipStatusListener? = null
+    ): String {
         val zFile = ZipFile(zipFile)
         zFile.charset =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) StandardCharsets.UTF_8 else Charset.defaultCharset()
         if (!zFile.isValidZipFile) {
-//            throw ZipException("压缩文件不合法,可能被损坏.")
-            return ArrayList()
+            listener?.onError(ZipException("压缩文件不合法,可能被损坏."))
+            return ""
         }
         val destDir = if (destPath.isEmpty()) {
             val parentDir = zipFile.parentFile
@@ -51,21 +56,60 @@ object ZipUtils {
         if (psw.isNotEmpty() && zFile.isEncrypted) {
             zFile.setPassword(psw.toCharArray())
         }
-        zFile.extractAll(destPath)
-        val headerList: List<FileHeader> = zFile.fileHeaders
-        val extractedFileList: ArrayList<File> = ArrayList()
-        for (fileHeader in headerList) {
-            if (!fileHeader.isDirectory) {
-                extractedFileList.add(File(destDir, fileHeader.fileName))
-            }
+
+        if (listener != null) {
+            fetchProgressMonitor(zFile, destDir.absolutePath, listener = listener)
         }
-        return extractedFileList
+
+        zFile.isRunInThread = false
+        zFile.extractAll(destDir.absolutePath)
+
+        return destDir.absolutePath
+    }
+
+    /**
+     * 获取当前压缩或解压的进度；如果完成回调 压缩之后压缩文件或解压之后的解压文件夹 的地址
+     *
+     * @param zFile 用来操作解压或压缩的对象
+     * @param destPath 压缩之后压缩文件或解压之后的解压文件夹 的地址
+     * @param period 获取进度的频率，默认500ms获取一次
+     * @param listener 回调解压状态
+     * */
+    private fun fetchProgressMonitor(
+        zFile: ZipFile,
+        destPath: String,
+        period: Long = 500L,
+        listener: OnZipStatusListener
+    ) {
+        val progressMonitor = zFile.progressMonitor
+        listener.onStart()
+        Thread {
+            var curProgress: Int
+            while (true) {
+                curProgress = progressMonitor.percentDone
+                listener.onProgress(curProgress)
+
+                if (progressMonitor.result == ProgressMonitor.Result.ERROR) {
+                    listener.onError(progressMonitor.exception ?: ZipException("解压失败"))
+                    break
+                }
+                if (progressMonitor.result == ProgressMonitor.Result.CANCELLED) {
+                    listener.onError(progressMonitor.exception ?: ZipException("解压已取消"))
+                    break
+                }
+                if (progressMonitor.result == ProgressMonitor.Result.SUCCESS) {
+                    listener.onCompleted(destPath)
+                    break
+                }
+                Thread.sleep(period)
+            }
+        }.start()
+
     }
 
 
     /**
      * 使用给定密码压缩指定文件或文件夹到指定位置.
-     *
      *
      * dest可传最终压缩文件存放的绝对路径,也可以传存放目录,也可以传null或者"".<br></br>
      * 如果传空则将压缩文件存放在当前目录,即跟源文件同目录,压缩文件名取源文件名,以.zip为后缀;<br></br>
@@ -74,13 +118,16 @@ object ZipUtils {
      * @param destPath 压缩文件存放路径，传递空表示不指定，使用srcPath的来命名
      * @param isCreateDir 是否在压缩文件里创建目录,仅在压缩文件为目录时有效.如果为false,将直接压缩目录下文件到压缩文件.
      * @param psw 压缩使用的密码
-     * @return 最终的压缩文件存放的绝对路径,如果为null则说明压缩失败.
+     * @param listener 监听状态
+     *
+     * @return 最终的压缩文件存放的绝对路径,如果为空则说明压缩失败.
      */
     fun zip(
         srcPath: String,
         destPath: String = "",
         isCreateDir: Boolean = true,
-        psw: String = ""
+        psw: String = "",
+        listener: OnZipStatusListener? = null
     ): String {
         var dest = destPath
         val srcFile = File(srcPath)
@@ -100,16 +147,28 @@ object ZipUtils {
                     val subFiles = srcFile.listFiles() ?: arrayOf()
                     val temp = ArrayList<File>()
                     Collections.addAll(temp, *subFiles)
+
+                    if (listener != null) {
+                        fetchProgressMonitor(zipFile, dest, listener = listener)
+                    }
                     zipFile.addFiles(temp, parameters)
+
                     return dest
+                }
+
+                if (listener != null) {
+                    fetchProgressMonitor(zipFile, dest, listener = listener)
                 }
                 zipFile.addFolder(srcFile, parameters)
             } else {
+                if (listener != null) {
+                    fetchProgressMonitor(zipFile, dest, listener = listener)
+                }
                 zipFile.addFile(srcFile, parameters)
             }
             return dest
         } catch (e: ZipException) {
-            e.printStackTrace()
+            listener?.onError(e)
         }
         return ""
     }
@@ -125,7 +184,9 @@ object ZipUtils {
         var destParam = destPath
         if (destParam.isEmpty()) {
             val prefix =
-                if (srcFile.parent == null || srcFile.parent!!.isEmpty()) "" else srcFile.parent!! + File.separator
+                if (srcFile.parent == null || srcFile.parent!!.isEmpty()) "" else {
+                    srcFile.parent!! + File.separator
+                }
             destParam = if (srcFile.isDirectory) {
                 prefix + srcFile.name + ".zip"
             } else {
